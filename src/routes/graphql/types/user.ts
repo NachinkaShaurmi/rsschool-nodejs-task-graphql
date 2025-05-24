@@ -20,41 +20,25 @@ export const UserType = new GraphQLObjectType({
     profile: {
       type: ProfileType,
       resolve: (user, _args, context: GQLContext) => {
-        return context.prisma.profile.findUnique({
-          where: { userId: user.id },
-        });
+        return context.loaders.profileLoader.load(user.id);
       },
     },
     posts: {
       type: new GraphQLList(PostType),
       resolve: (user, _args, context: GQLContext) => {
-        return context.prisma.post.findMany({
-          where: { authorId: user.id },
-        });
+        return context.loaders.postLoader.load(user.id);
       },
     },
     userSubscribedTo: {
       type: new GraphQLList(UserType),
       resolve: (user, _args, context: GQLContext) => {
-        return context.prisma.user.findMany({
-          where: {
-            subscribedToUser: {
-              some: { subscriberId: user.id },
-            },
-          },
-        });
+        return context.loaders.userSubscribedToLoader.load(user.id);
       },
     },
     subscribedToUser: {
       type: new GraphQLList(UserType),
       resolve: (user, _args, context: GQLContext) => {
-        return context.prisma.user.findMany({
-          where: {
-            userSubscribedTo: {
-              some: { authorId: user.id },
-            },
-          },
-        });
+        return context.loaders.subscribedToUserLoader.load(user.id);
       },
     },
   }),

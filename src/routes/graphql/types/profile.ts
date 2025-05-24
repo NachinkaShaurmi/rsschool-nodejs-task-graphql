@@ -15,13 +15,11 @@ export const ProfileType = new GraphQLObjectType({
     id: { type: UUIDType },
     isMale: { type: GraphQLBoolean },
     yearOfBirth: { type: GraphQLInt },
-    memberTypeId: { type: MemberType },
+    memberTypeId: { type: MemberTypeId },
     memberType: {
       type: MemberType,
       resolve: (profile, _args, context: GQLContext) => {
-        return context.prisma.memberType.findUnique({
-          where: { id: profile.memberTypeId },
-        });
+        return context.loaders.membersLoader.load(profile.memberTypeId);
       },
     },
   },

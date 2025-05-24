@@ -1,9 +1,12 @@
+import DataLoader from 'dataloader';
+import { User } from '@prisma/client';
 import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 import { createGqlResponseSchema, gqlResponseSchema } from './schemas.js';
 import { graphql, GraphQLSchema, parse, validate } from 'graphql';
 import { RootQueryType } from './queries.js';
 import { Mutations } from './mutations.js';
 import depthLimit from 'graphql-depth-limit';
+import { createLoaders } from './loaders.js';
 
 const schema = new GraphQLSchema({
   query: RootQueryType,
@@ -28,11 +31,13 @@ const plugin: FastifyPluginAsyncTypebox = async (fastify) => {
 
       if (errors.length) return { errors };
 
+      const loaders = createLoaders(prisma);
+
       return graphql({
         schema,
         source: req.body.query,
         variableValues: req.body.variables,
-        contextValue: { prisma },
+        contextValue: { prisma, loaders },
       });
     },
   });
